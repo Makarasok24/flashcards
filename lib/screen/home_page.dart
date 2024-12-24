@@ -1,4 +1,5 @@
 import 'package:flashcards/data/dummy_item.dart';
+import 'package:flashcards/data/progress_storage.dart';
 import 'package:flashcards/models/decks.dart';
 import 'package:flashcards/screen/flashcard/card.dart';
 import 'package:flashcards/screen/testing/test_page.dart';
@@ -6,13 +7,32 @@ import 'package:flashcards/widget/icon_button.dart';
 import 'package:flutter/material.dart';
 
 class HomePage extends StatefulWidget {
-  const HomePage({super.key, required this.progress});
-  final double progress;
+  const HomePage({
+    super.key,
+  });
+
   @override
   State<HomePage> createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
+  Map<String, double> progress = {};
+  @override
+  void initState() {
+    super.initState();
+    _fetchProgress();
+  }
+
+  Future<void> _fetchProgress() async {
+    // Assuming `dummyDeckItems` is a list of deck titles
+    List<String> deckNames = dummyDeckItems.map((deck) => deck.title).toList();
+
+    final data = await ProgressStorage.getAllProgress(deckNames);
+    setState(() {
+      progress = data; // Store all progress data for multiple decks
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     Widget content = const Center(
@@ -27,7 +47,7 @@ class _HomePageState extends State<HomePage> {
         itemCount: dummyDeckItems.length,
         itemBuilder: (ctx, index) => DecksTile(
           decks: dummyDeckItems[index],
-          progress: widget.progress / 100,
+          progress: progress[dummyDeckItems[index].title] ?? 0,
           onTap: () {
             showModalBottomSheet<void>(
               backgroundColor: Colors.blue.shade200,
@@ -216,7 +236,7 @@ class DecksTile extends StatelessWidget {
                     borderRadius: BorderRadius.circular(5),
                   ),
                   const SizedBox(height: 5),
-                  Text("${progress * 100}%"),
+                  Text("${(progress * 100).toStringAsFixed(2)}%"),
                 ],
               ),
             ),

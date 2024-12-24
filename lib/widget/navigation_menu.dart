@@ -34,9 +34,7 @@ class _NavigationMenuState extends State<NavigationMenu> {
   void initState() {
     super.initState();
     pages = [
-      const HomePage(
-        progress: 0.0,
-      ),
+      const HomePage(),
       CreatDeck(onAddDeck: _addNewDeck),
       const ProfilePage(),
     ];

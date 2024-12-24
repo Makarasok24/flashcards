@@ -1,11 +1,10 @@
+import 'package:flashcards/data/progress_storage.dart';
 import 'package:flashcards/models/decks.dart';
 import 'package:flashcards/models/submission.dart';
 import 'package:flashcards/router/router.dart';
+import 'package:flashcards/screen/testing/test_page.dart';
 import 'package:flashcards/widget/icon_button.dart';
-import 'package:flashcards/widget/navigation_menu.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 
 class ResultScreen extends StatelessWidget {
   const ResultScreen({
@@ -17,7 +16,11 @@ class ResultScreen extends StatelessWidget {
   final Submission submission;
   @override
   Widget build(BuildContext context) {
-    double prgress = submission.getScore() / decks.cards!.length * 100;
+    double prgress = submission.getScore() / decks.cards!.length;
+
+    // save progress
+    ProgressStorage.saveProgress(decks.title, prgress);
+
     return Scaffold(
       body: Center(
         child: Padding(
@@ -32,7 +35,7 @@ class ResultScreen extends StatelessWidget {
                 height: 20,
               ),
               Text(
-                '${prgress.toStringAsFixed(2)}%',
+                '${(prgress * 100).toStringAsFixed(2)}%',
                 style: TextStyle(
                   fontSize: 50,
                   fontWeight: FontWeight.bold,
@@ -57,7 +60,8 @@ class ResultScreen extends StatelessWidget {
                 color: Colors.blue.shade400,
                 textColor: Colors.white,
                 onTap: () {
-                  //Navigator.pushNamed(context, Routes.test);
+                  submission.removeAnswers();
+                  Navigator.pushNamed(context, Routes.test, arguments: decks);
                 },
               ),
               const SizedBox(
@@ -69,8 +73,6 @@ class ResultScreen extends StatelessWidget {
                 color: Colors.red.shade400,
                 textColor: Colors.white,
                 onTap: () {
-                  // Navigator.pushReplacementNamed(context, Routes.home,
-                  //     arguments: prgress);
                   Navigator.pushNamed(context, Routes.navigationMenu,
                       arguments: prgress);
                 },

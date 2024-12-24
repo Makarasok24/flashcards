@@ -1,4 +1,3 @@
-
 import 'package:flashcards/models/decks.dart';
 import 'package:flashcards/models/submission.dart';
 import 'package:flashcards/screen/results/result_page.dart';
@@ -201,7 +200,7 @@ class BackCard extends StatelessWidget {
               Text(
                 "Correct answer: $answer",
                 style: const TextStyle(
-                  fontSize: 40,
+                  fontSize: 20,
                   color: Colors.white,
                 ),
               ),
