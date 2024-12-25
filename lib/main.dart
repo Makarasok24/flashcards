@@ -1,5 +1,4 @@
 import 'package:flashcards/router/router.dart';
-import 'package:flashcards/widget/navigation_menu.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -16,7 +15,6 @@ class MyApp extends StatelessWidget {
       title: 'Flashcards App',
       initialRoute: Routes.welcome,
       onGenerateRoute: Routes.onGenerateRoute,
-      home: NavigationMenu(),
     );
   }
 }

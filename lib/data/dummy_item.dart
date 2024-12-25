@@ -1,7 +1,7 @@
 import 'package:flashcards/models/decks.dart';
 
 final dummyDeckItems = [
-  Decks(title: "Hiragana", image: "assets/image/cardimg1.png", cards: [
+  Decks(title: "Hiragana", image: "", cards: [
     Cards(
       titleCard: "あ",
       goodAnswer: "a",
@@ -43,7 +43,7 @@ final dummyDeckItems = [
       goodAnswer: "ko",
     )
   ]),
-  Decks(title: "Katakana", image: "assets/image/cardimg2.png", cards: [
+  Decks(title: "Katakana", image: "", cards: [
     Cards(
       titleCard: "タ",
       goodAnswer: "ta",

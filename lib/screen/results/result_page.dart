@@ -2,7 +2,6 @@ import 'package:flashcards/data/progress_storage.dart';
 import 'package:flashcards/models/decks.dart';
 import 'package:flashcards/models/submission.dart';
 import 'package:flashcards/router/router.dart';
-import 'package:flashcards/screen/testing/test_page.dart';
 import 'package:flashcards/widget/icon_button.dart';
 import 'package:flutter/material.dart';
 
@@ -16,10 +15,10 @@ class ResultScreen extends StatelessWidget {
   final Submission submission;
   @override
   Widget build(BuildContext context) {
-    double prgress = submission.getScore() / decks.cards!.length;
-
+    double progress = submission.getScore() / decks.cards!.length;
+    int getScore = submission.getScore();
     // save progress
-    ProgressStorage.saveProgress(decks.title, prgress);
+    ProgressStorage.saveProgress(decks.title, progress);
 
     return Scaffold(
       body: Center(
@@ -30,27 +29,91 @@ class ResultScreen extends StatelessWidget {
               const SizedBox(
                 height: 40,
               ),
-              const Text('Accuracy Rate'),
-              const SizedBox(
-                height: 20,
-              ),
-              Text(
-                '${(prgress * 100).toStringAsFixed(2)}%',
-                style: TextStyle(
-                  fontSize: 50,
-                  fontWeight: FontWeight.bold,
-                ),
+              const Text(
+                'Accuracy Rate',
+                style: TextStyle(fontSize: 20),
               ),
               const SizedBox(
-                height: 20,
+                height: 30,
               ),
-              Text(
-                  'You got ${submission.getScore()} out of ${decks.cards?.length} questions right'),
+              // Text(
+              //   '${(progress * 100).toStringAsFixed(2)}%',
+              //   style: const TextStyle(
+              //     fontSize: 50,
+              //     fontWeight: FontWeight.bold,
+              //   ),
+              // ),
+              Stack(
+                alignment: Alignment.center,
+                children: [
+                  SizedBox(
+                    width: 100,
+                    height: 100,
+                    child: CircularProgressIndicator(
+                      value: progress,
+                      strokeWidth: 8,
+                      strokeCap: StrokeCap.round,
+                      backgroundColor: Colors.blue.shade100,
+                      valueColor:
+                          const AlwaysStoppedAnimation<Color>(Colors.blue),
+                    ),
+                  ),
+                  Center(
+                    child: Text(
+                      '${(progress * 100).toStringAsFixed(2)}%',
+                      style: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(
+                height: 30,
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Row(
+                    children: [
+                      const Icon(Icons.check_circle_outline,
+                          color: Colors.green),
+                      Text(
+                        '$getScore corrects',
+                        style: const TextStyle(
+                          color: Colors.green,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(
+                    width: 10,
+                  ),
+                  Row(
+                    children: [
+                      const Icon(Icons.cancel_outlined, color: Colors.red),
+                      Text(
+                        '${decks.cards!.length - getScore} incorrects',
+                        style: const TextStyle(
+                          color: Colors.red,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
               const SizedBox(
                 height: 20,
               ),
               // Feedback message
-              Text('You can do better next time'),
+              Text(progress >= 0.9
+                  ? "Greate Work!"
+                  : progress >= 0.5
+                      ? "Good job, but keep improving!"
+                      : 'You can do better next time'),
               const SizedBox(
                 height: 20,
               ),
@@ -73,12 +136,12 @@ class ResultScreen extends StatelessWidget {
                 color: Colors.red.shade400,
                 textColor: Colors.white,
                 onTap: () {
-                  Navigator.pushNamed(context, Routes.navigationMenu,
-                      arguments: prgress);
+                  Navigator.pushReplacementNamed(context, Routes.navigationMenu,
+                      arguments: decks);
                 },
               ),
               const SizedBox(
-                height: 20,
+                height: 10,
               ),
               Expanded(
                 child: ListView.builder(

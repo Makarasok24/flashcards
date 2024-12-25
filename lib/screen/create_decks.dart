@@ -1,118 +1,157 @@
-//import 'package:flashcards/models/decks.dart';
+import 'dart:io';
+
+import 'package:flashcards/models/decks.dart';
+import 'package:flashcards/screen/home_page.dart';
 import 'package:flashcards/widget/button.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 
-class CreatDeck extends StatefulWidget {
-  const CreatDeck({super.key, required this.onAddDeck});
-  final Function(String, String?) onAddDeck;
+class CreateDeck extends StatefulWidget {
+  const CreateDeck({super.key, this.deck, required this.mode});
+  final Decks? deck;
+  final Mode mode;
 
   @override
-  State<CreatDeck> createState() => _CreatDeckState();
+  State<CreateDeck> createState() => _CreateDeckState();
 }
 
-class _CreatDeckState extends State<CreatDeck> {
-  final TextEditingController _titleController = TextEditingController();
-  String? imagePath =
-      "assets/image/cardimg1.png"; // Placeholder for image path (optional)
+class _CreateDeckState extends State<CreateDeck> {
+  final _formKey = GlobalKey<FormState>();
+  File? _selectedImage;
+  final _imagePicker = ImagePicker();
+  String _enteredName = "";
 
-  void _uploadImage() {
-    setState(() {
-      imagePath = "assets/image/cardimg3.png";
-    });
+  Future<void> _pickImageFromGallery() async {
+    try {
+      final pickedFile =
+          await _imagePicker.pickImage(source: ImageSource.gallery);
+      if (pickedFile != null) {
+        setState(() {
+          _selectedImage = File(pickedFile.path);
+        });
+      }
+    } catch (e) {
+      debugPrint("Error picking image: $e");
+    }
   }
 
-  void _createDeck() {
-    final title = _titleController.text.trim();
-    if (title.isNotEmpty) {
-      widget.onAddDeck(title, imagePath);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Deck created successfully!')),
+  void _saveItem() {
+    if (_formKey.currentState!.validate()) {
+      _formKey.currentState!.save();
+
+      final newItem = Decks(
+        title: _enteredName,
+        image: _selectedImage?.path ?? "",
+        cards: [],
       );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter a title.')),
-      );
+      Navigator.of(context).pop(newItem);
+    }
+  }
+
+  void _resetForm() {
+    _formKey.currentState?.reset();
+    // setState(() {
+    //   _enteredName = "";
+    //   _selectedImage = null;
+    // });
+  }
+
+  String? validateTitle(String? value) {
+    if (value == null || value.isEmpty || value.trim().length > 40) {
+      return 'Must be between 1 and 40 characters.';
+    }
+    return null;
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.deck != null) {
+      _enteredName = widget.deck!.title;
+      if (widget.deck!.image!.isNotEmpty) {
+        _selectedImage = File(widget.deck!.image!);
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const SizedBox(
-            height: 20,
-          ),
-          const Center(
-            child: Text(
-              "Create new deck",
-              style: TextStyle(
-                fontSize: 30,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-          const SizedBox(
-            height: 10,
-          ),
-          TextField(
-            controller: _titleController,
-            decoration: InputDecoration(
-              label: const Text("Title"),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderSide: BorderSide(color: Colors.grey.shade700, width: 1),
-                borderRadius: BorderRadius.circular(10),
-              ),
-            ),
-          ),
-          const SizedBox(
-            height: 10,
-          ),
-          Button(nameButton: "Upload Image", onTap: _uploadImage),
-          const SizedBox(
-            height: 10,
-          ),
-          Row(
+    final isEditing = widget.mode == Mode.editing;
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(isEditing ? "Rename Deck" : 'Add a New Deck'),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Form(
+          key: _formKey,
+          child: Column(
             children: [
-              SizedBox(
-                width: MediaQuery.of(context).size.width * 0.4,
-                child: OutlinedButton(
-                  onPressed: () {
-                    // Navigator.of(context).pop();
-                  },
-                  style: OutlinedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
+              TextFormField(
+                initialValue: _enteredName,
+                maxLength: 40,
+                decoration: const InputDecoration(
+                  labelText: 'Title',
+                ),
+                validator: validateTitle,
+                onSaved: (value) {
+                  _enteredName = value!;
+                },
+              ),
+              const SizedBox(height: 10),
+              Button(
+                nameButton: "Upload Image",
+                onTap: _pickImageFromGallery,
+              ),
+              const SizedBox(height: 12),
+              // Show preview of the selected image
+              if (_selectedImage != null)
+                Column(
+                  children: [
+                    const Text('Selected Image:'),
+                    const SizedBox(height: 8),
+                    _selectedImage == null
+                        ? const Text('No image selected')
+                        : Image.file(
+                            _selectedImage!,
+                            height: 150,
+                            width: 150,
+                            fit: BoxFit.cover,
+                          ),
+                  ],
+                ),
+              const SizedBox(height: 12),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  ElevatedButton(
+                    onPressed: _resetForm,
+                    style: ButtonStyle(
+                      backgroundColor: WidgetStateProperty.all(Colors.red),
+                    ),
+                    child: const Text(
+                      'Reset',
+                      style: TextStyle(color: Colors.white),
                     ),
                   ),
-                  child: const Text("Cancel"),
-                ),
-              ),
-              const SizedBox(
-                width: 20,
-              ),
-              SizedBox(
-                width: MediaQuery.of(context).size.width * 0.45,
-                child: ElevatedButton(
-                  onPressed: _createDeck,
-                  style: OutlinedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
+                  const SizedBox(width: 8),
+                  ElevatedButton(
+                    onPressed: _saveItem,
+                    style: ButtonStyle(
+                      backgroundColor:
+                          WidgetStateProperty.all(Colors.blue.shade300),
+                    ),
+                    child: Text(
+                      isEditing ? "Update" : 'Add Deck',
+                      style: const TextStyle(color: Colors.white),
                     ),
                   ),
-                  child: const Text("Add"),
-                ),
-              )
+                ],
+              ),
             ],
-          )
-        ],
+          ),
+        ),
       ),
     );
   }

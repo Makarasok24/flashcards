@@ -20,6 +20,74 @@ class _CardsPageState extends State<CardsPage> {
     });
   }
 
+  void deleteCard(int index) {
+    setState(() {
+      widget.decks.cards!.removeAt(index);
+    });
+  }
+
+  void editCard(int index, String title, String goodAnswer) {
+    final updateTitleCard = TextEditingController(text: title);
+    final updateGoodAnswer = TextEditingController(text: goodAnswer);
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text("Edit Card"),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: updateTitleCard,
+                decoration: const InputDecoration(labelText: "Card Title"),
+              ),
+              const SizedBox(height: 10),
+              TextField(
+                controller: updateGoodAnswer,
+                decoration: const InputDecoration(labelText: "Card Answer"),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text("Cancel"),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                final updatedTitle = updateTitleCard.text.trim();
+                final updatedAnswer = updateGoodAnswer.text.trim();
+
+                if (updatedTitle.isNotEmpty && updatedAnswer.isNotEmpty) {
+                  setState(() {
+                    widget.decks.cards![index].titleCard = updatedTitle;
+                    widget.decks.cards![index].goodAnswer = updatedAnswer;
+                  });
+                  Navigator.pop(context);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: const Text('Card updated successfully!'),
+                      backgroundColor: Colors.blue.shade400,
+                    ),
+                  );
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: const Text('Please fill in all fields!'),
+                      backgroundColor: Colors.red.shade400,
+                    ),
+                  );
+                }
+              },
+              child: const Text("Save"),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   void _showAddCardDialog(BuildContext context) {
     showDialog(
       context: context,
@@ -78,14 +146,27 @@ class _CardsPageState extends State<CardsPage> {
     );
   }
 
+  // @override
+
+  // void initState() {
+  //   // TODO: implement initState
+  //   super.initState();
+  //   if(widget.decks != null && widget.decks!.cards!.isNotEmpty){
+  //     setState(() {
+  //       _cardTitle = widget.decks!.cards[index].titleCard;
+  //       _cardAnswer = widget.decks!.cards![index].goodAnswer;
+  //     });
+  //   }
+  // }
+
   @override
   Widget build(BuildContext context) {
-    final cards = widget.decks.cards;
+    final cards = widget.decks.cards!;
     Widget content = const Center(
       child: Text("No item yet!"),
     );
 
-    if (cards!.isNotEmpty) {
+    if (cards.isNotEmpty) {
       content = ListView.builder(
         shrinkWrap: true, // Allows ListView to size itself within Column
         physics:
@@ -94,6 +175,10 @@ class _CardsPageState extends State<CardsPage> {
         itemBuilder: (context, index) {
           return CardTile(
             title: cards[index].titleCard, // Card title
+            onDelete: () => deleteCard(index),
+            onEdit: () {
+              editCard(index, cards[index].titleCard, cards[index].goodAnswer);
+            },
           );
         },
       );
@@ -125,8 +210,15 @@ class _CardsPageState extends State<CardsPage> {
 }
 
 class CardTile extends StatelessWidget {
-  const CardTile({super.key, required this.title});
+  const CardTile({
+    super.key,
+    required this.title,
+    required this.onDelete,
+    required this.onEdit,
+  });
   final String title;
+  final VoidCallback onDelete;
+  final VoidCallback onEdit;
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -136,11 +228,35 @@ class CardTile extends StatelessWidget {
         color: Colors.grey.shade200,
         borderRadius: BorderRadius.circular(10),
       ),
-      child: Text(
-        title,
-        style: const TextStyle(
-          fontSize: 40,
-        ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            title,
+            style: const TextStyle(
+              fontSize: 40,
+            ),
+          ),
+          Column(
+            children: [
+              IconButton(
+                onPressed: onEdit,
+                icon: Icon(
+                  Icons.edit,
+                  color: Colors.green.shade500,
+                ),
+              ),
+              const SizedBox(height: 10),
+              IconButton(
+                onPressed: onDelete,
+                icon: Icon(
+                  Icons.delete,
+                  color: Colors.red.shade500,
+                ),
+              )
+            ],
+          )
+        ],
       ),
     );
   }

@@ -7,7 +7,7 @@ enum Category {
   delete(Icons.delete_outline_outlined),
   restart(Icons.restart_alt_outlined),
   end(Icons.stop_circle_outlined),
-  ;
+  upload(Icons.upload_file_rounded);
 
   final IconData icon;
 
