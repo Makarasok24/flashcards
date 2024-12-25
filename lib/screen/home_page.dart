@@ -330,11 +330,14 @@ class DecksTile extends StatelessWidget {
                       ),
                     ),
                   )
-                : Image.file(
-                    File(decks.image!),
-                    height: 120,
-                    width: 80,
-                    fit: BoxFit.cover,
+                : ClipRRect(
+                    borderRadius: BorderRadius.circular(10),
+                    child: Image.file(
+                      File(decks.image!),
+                      height: 120,
+                      width: 80,
+                      fit: BoxFit.cover,
+                    ),
                   ),
             const SizedBox(width: 20),
             Expanded(

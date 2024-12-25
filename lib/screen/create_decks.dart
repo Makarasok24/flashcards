@@ -82,74 +82,76 @@ class _CreateDeckState extends State<CreateDeck> {
       appBar: AppBar(
         title: Text(isEditing ? "Rename Deck" : 'Add a New Deck'),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            children: [
-              TextFormField(
-                initialValue: _enteredName,
-                maxLength: 40,
-                decoration: const InputDecoration(
-                  labelText: 'Title',
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              children: [
+                TextFormField(
+                  initialValue: _enteredName,
+                  maxLength: 40,
+                  decoration: const InputDecoration(
+                    labelText: 'Title',
+                  ),
+                  validator: validateTitle,
+                  onSaved: (value) {
+                    _enteredName = value!;
+                  },
                 ),
-                validator: validateTitle,
-                onSaved: (value) {
-                  _enteredName = value!;
-                },
-              ),
-              const SizedBox(height: 10),
-              Button(
-                nameButton: "Upload Image",
-                onTap: _pickImageFromGallery,
-              ),
-              const SizedBox(height: 12),
-              // Show preview of the selected image
-              if (_selectedImage != null)
-                Column(
+                const SizedBox(height: 10),
+                Button(
+                  nameButton: "Upload Image",
+                  onTap: _pickImageFromGallery,
+                ),
+                const SizedBox(height: 12),
+                // Show preview of the selected image
+                if (_selectedImage != null)
+                  Column(
+                    children: [
+                      const Text('Selected Image:'),
+                      const SizedBox(height: 8),
+                      _selectedImage == null
+                          ? const Text('No image selected')
+                          : Image.file(
+                              _selectedImage!,
+                              height: 150,
+                              width: 150,
+                              fit: BoxFit.cover,
+                            ),
+                    ],
+                  ),
+                const SizedBox(height: 12),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Text('Selected Image:'),
-                    const SizedBox(height: 8),
-                    _selectedImage == null
-                        ? const Text('No image selected')
-                        : Image.file(
-                            _selectedImage!,
-                            height: 150,
-                            width: 150,
-                            fit: BoxFit.cover,
-                          ),
+                    ElevatedButton(
+                      onPressed: _resetForm,
+                      style: ButtonStyle(
+                        backgroundColor: WidgetStateProperty.all(Colors.red),
+                      ),
+                      child: const Text(
+                        'Reset',
+                        style: TextStyle(color: Colors.white),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    ElevatedButton(
+                      onPressed: _saveItem,
+                      style: ButtonStyle(
+                        backgroundColor:
+                            WidgetStateProperty.all(Colors.blue.shade300),
+                      ),
+                      child: Text(
+                        isEditing ? "Update" : 'Add Deck',
+                        style: const TextStyle(color: Colors.white),
+                      ),
+                    ),
                   ],
                 ),
-              const SizedBox(height: 12),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  ElevatedButton(
-                    onPressed: _resetForm,
-                    style: ButtonStyle(
-                      backgroundColor: WidgetStateProperty.all(Colors.red),
-                    ),
-                    child: const Text(
-                      'Reset',
-                      style: TextStyle(color: Colors.white),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  ElevatedButton(
-                    onPressed: _saveItem,
-                    style: ButtonStyle(
-                      backgroundColor:
-                          WidgetStateProperty.all(Colors.blue.shade300),
-                    ),
-                    child: Text(
-                      isEditing ? "Update" : 'Add Deck',
-                      style: const TextStyle(color: Colors.white),
-                    ),
-                  ),
-                ],
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
